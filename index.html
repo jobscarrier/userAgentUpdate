@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone User Agent Generator - Facebook iOS App Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .config-section {
+            transition: all 0.3s ease;
+        }
+        .config-section.collapsed {
+            max-height: 60px;
+            overflow: hidden;
+        }
+        .config-section.expanded {
+            max-height: 1000px;
+        }
+        .user-agent-item {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            word-break: break-all;
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                <i class="fab fa-apple text-gray-600"></i>
+                iPhone User Agent Generator
+            </h1>
+            <p class="text-gray-600">Facebook iOS App Simulator with Custom Rules Engine</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Generator Panel -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-cogs text-blue-500"></i>
+                        Generator
+                    </h2>
+                    
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                        <input type="number" id="quantity" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="1" max="1000" value="10">
+                    </div>
+
+                    <button id="generateBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 mb-4">
+                        <i class="fas fa-magic mr-2"></i>
+                        Generate User Agents
+                    </button>
+
+                    <div class="space-y-2">
+                        <button id="copyBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-copy mr-2"></i>
+                            Copy All
+                        </button>
+                        <button id="downloadBtn" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                            <i class="fas fa-download mr-2"></i>
+                            Download as .txt
+                        </button>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <span id="generatedCount" class="text-sm text-gray-600">0 user agents generated</span>
+                    </div>
+                </div>
+
+                <!-- Configuration Panel -->
+                <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-edit text-orange-500"></i>
+                        Configuration
+                    </h2>
+
+                    <!-- OS Versions -->
+                    <div class="config-section collapsed mb-4" id="osConfig">
+                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('osConfig')">
+                            <h3 class="text-lg font-medium text-gray-700">OS Versions</h3>
+                            <i class="fas fa-chevron-down transform transition-transform" id="osConfigIcon"></i>
+                        </div>
+                        <div class="mt-3">
+                            <textarea id="osVersions" class="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="One per line..."></textarea>
+                            <button onclick="updateConfig('osVersions')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Tokens -->
+                    <div class="config-section collapsed mb-4" id="mobileConfig">
+                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('mobileConfig')">
+                            <h3 class="text-lg font-medium text-gray-700">Mobile Tokens</h3>
+                            <i class="fas fa-chevron-down transform transition-transform" id="mobileConfigIcon"></i>
+                        </div>
+                        <div class="mt-3">
+                            <textarea id="mobileTokens" class="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="Format: OS 16_1_1:Mobile/20B101"></textarea>
+                            <button onclick="updateConfig('mobileTokens')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
+                        </div>
+                    </div>
+
+                    <!-- FBAV Options -->
+                    <div class="config-section collapsed mb-4" id="fbavConfig">
+                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('fbavConfig')">
+                            <h3 class="text-lg font-medium text-gray-700">FBAV Options</h3>
+                            <i class="fas fa-chevron-down transform transition-transform" id="fbavConfigIcon"></i>
+                        </div>
+                        <div class="mt-3">
+                            <textarea id="fbavOptions" class="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="One per line..."></textarea>
+                            <button onclick="updateConfig('fbavOptions')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
+                        </div>
+                    </div>
+
+                    <!-- FBBV Options -->
+                    <div class="config-section collapsed mb-4" id="fbbvConfig">
+                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('fbbvConfig')">
+                            <h3 class="text-lg font-medium text-gray-700">FBBV Options</h3>
+                            <i class="fas fa-chevron-down transform transition-transform" id="fbbvConfigIcon"></i>
+                        </div>
+                        <div class="mt-3">
+                            <textarea id="fbbvOptions" class="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="One per line..."></textarea>
+                            <button onclick="updateConfig('fbbvOptions')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
+                        </div>
+                    </div>
+
+                    <!-- FBDV Rules -->
+                    <div class="config-section collapsed mb-4" id="fbdvConfig">
+                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('fbdvConfig')">
+                            <h3 class="text-lg font-medium text-gray-700">FBDV Rules</h3>
+                            <i class="fas fa-chevron-down transform transition-transform" id="fbdvConfigIcon"></i>
+                        </div>
+                        <div class="mt-3">
+                            <textarea id="fbdvRules" class="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="Format: iOS 18:iPhone17,3,iPhone17,4"></textarea>
+                            <button onclick="updateConfig('fbdvRules')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
+                        </div>
+                    </div>
+
+                    <!-- FBRV Options -->
+                    <div class="config-section collapsed mb-4" id="fbrvConfig">
+                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('fbrvConfig')">
+                            <h3 class="text-lg font-medium text-gray-700">FBRV Options</h3>
+                            <i class="fas fa-chevron-down transform transition-transform" id="fbrvConfigIcon"></i>
+                        </div>
+                        <div class="mt-3">
+                            <textarea id="fbrvOptions" class="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="One per line..."></textarea>
+                            <button onclick="updateConfig('fbrvOptions')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-list text-green-500"></i>
+                        Generated User Agents
+                    </h2>
+                    
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-gray-600">Results:</span>
+                            <div id="loadingSpinner" class="hidden">
+                                <i class="fas fa-spinner spinner text-blue-500"></i>
+                                <span class="text-blue-500 ml-2">Generating...</span>
+                            </div>
+                        </div>
+                        <div id="results" class="border border-gray-300 rounded-lg p-4 bg-gray-50 h-96 overflow-y-auto">
+                            <p class="text-gray-500 text-center italic">No user agents generated yet. Click "Generate User Agents" to start.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration Data
+        let config = {
+            osVersions: [
+                'OS 16_1_1', 'OS 16_2', 'OS 16_3_1', 'OS 17_0_3', 'OS 17_3_1',
+                'OS 17_5_1', 'OS 17_6_1', 'OS 17_7_1', 'OS 18_1', 'OS 18_1_1',
+                'OS 18_2', 'OS 18_2_1', 'OS 18_3', 'OS 18_3_1', 'OS 18_3_2', 'OS 18_5'
+            ],
+            mobileTokens: {
+                'OS 16_1_1': 'Mobile/20B101',
+                'OS 16_2': 'Mobile/20C65',
+                'OS 16_3_1': 'Mobile/20D67',
+                'OS 17_0_3': 'Mobile/21A360',
+                'OS 17_3_1': 'Mobile/21D61',
+                'OS 17_5_1': 'Mobile/21F90',
+                'OS 17_6_1': 'Mobile/21G93',
+                'OS 17_7_1': 'Mobile/21H216',
+                'OS 18_1': 'Mobile/22B83',
+                'OS 18_1_1': 'Mobile/22B91',
+                'OS 18_2': 'Mobile/22C152',
+                'OS 18_2_1': 'Mobile/22C161',
+                'OS 18_3': 'Mobile/22D5034e',
+                'OS 18_3_1': 'Mobile/22D72',
+                'OS 18_3_2': 'Mobile/22D82',
+                'OS 18_5': 'Mobile/22F76'
+            },
+            fbavOptions: [
+                '521.0.0.42.97', '520.0.0.44.99', '519.0.0.44.92',
+                '523.0.0.39.61', '522.0.0.52.96', '518.0.0.63.86'
+            ],
+            fbbvOptions: [
+                '753726094', '763693145', '760232234', '743277063',
+                '746450682', '735017191', '740881359', '756351453'
+            ],
+            fbdvRules: {
+                'iOS 18': ['iPhone17,3', 'iPhone17,4', 'iPhone17,1', 'iPhone17,2'],
+                'iOS 17': ['iPhone15,4', 'iPhone15,5', 'iPhone16,1', 'iPhone16,2'],
+                'iOS 16': ['iPhone14,7', 'iPhone14,8', 'iPhone15,2', 'iPhone15,3'],
+                'iOS 15': ['iPhone14,4', 'iPhone14,5', 'iPhone14,2', 'iPhone14,3']
+            },
+            fbrvOptions: [
+                '680644226', '680322911', '680469061', '621632390', '681030704',
+                '680568676', '681076370', '681139536', '681201580', '653715064',
+                '681245869', '681417540', '681311148', '681558933', '681788640',
+                '682160012', '681945070', '682241554', '651031300', '682594010',
+                '682651530', '683081814', '682948902', '682998814', '684591905',
+                '684552024', '685547697', '702334248', '709773866', '709959009',
+                '709853509', '710721179', '708854960', '710721179', '711680447',
+                '708854960', '716125254', '715382107', '712354525', '719983960',
+                '719600518', '718473750', '717113040'
+            ]
+        };
+
+        let generatedUserAgents = [];
+
+        // Initialize configuration textareas
+        function initializeConfig() {
+            document.getElementById('osVersions').value = config.osVersions.join('\n');
+            
+            const mobileTokensText = Object.entries(config.mobileTokens)
+                .map(([os, token]) => `${os}:${token}`)
+                .join('\n');
+            document.getElementById('mobileTokens').value = mobileTokensText;
+            
+            document.getElementById('fbavOptions').value = config.fbavOptions.join('\n');
+            document.getElementById('fbbvOptions').value = config.fbbvOptions.join('\n');
+            
+            const fbdvRulesText = Object.entries(config.fbdvRules)
+                .map(([ios, devices]) => `${ios}:${devices.join(',')}`)
+                .join('\n');
+            document.getElementById('fbdvRules').value = fbdvRulesText;
+            
+            document.getElementById('fbrvOptions').value = config.fbrvOptions.join('\n');
+        }
+
+        // Toggle configuration sections
+        function toggleConfig(sectionId) {
+            const section = document.getElementById(sectionId);
+            const icon = document.getElementById(sectionId + 'Icon');
+            
+            if (section.classList.contains('collapsed')) {
+                section.classList.remove('collapsed');
+                section.classList.add('expanded');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                section.classList.remove('expanded');
+                section.classList.add('collapsed');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Update configuration
+        function updateConfig(configType) {
+            const textarea = document.getElementById(configType);
+            const value = textarea.value.trim();
+            
+            switch(configType) {
+                case 'osVersions':
+                    config.osVersions = value.split('\n').filter(v => v.trim());
+                    break;
+                case 'mobileTokens':
+                    config.mobileTokens = {};
+                    value.split('\n').forEach(line => {
+                        const [os, token] = line.split(':');
+                        if (os && token) {
+                            config.mobileTokens[os.trim()] = token.trim();
+                        }
+                    });
+                    break;
+                case 'fbavOptions':
+                    config.fbavOptions = value.split('\n').filter(v => v.trim());
+                    break;
+                case 'fbbvOptions':
+                    config.fbbvOptions = value.split('\n').filter(v => v.trim());
+                    break;
+                case 'fbdvRules':
+                    config.fbdvRules = {};
+                    value.split('\n').forEach(line => {
+                        const [ios, devices] = line.split(':');
+                        if (ios && devices) {
+                            config.fbdvRules[ios.trim()] = devices.split(',').map(d => d.trim());
+                        }
+                    });
+                    break;
+                case 'fbrvOptions':
+                    config.fbrvOptions = value.split('\n').filter(v => v.trim());
+                    break;
+            }
+            
+            // Show success message
+            const button = textarea.nextElementSibling;
+            const originalText = button.textContent;
+            button.textContent = 'Updated!';
+            button.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+            button.classList.add('bg-green-500', 'hover:bg-green-600');
+            
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('bg-green-500', 'hover:bg-green-600');
+                button.classList.add('bg-orange-500', 'hover:bg-orange-600');
+            }, 2000);
+        }
+
+        // Random selection helper
+        function randomSelect(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        // Get FBDV based on OS version
+        function getFBDV(osVersion) {
+            const version = parseInt(osVersion.split('_')[1]);
+            
+            if (version >= 18) {
+                return randomSelect(config.fbdvRules['iOS 18']);
+            } else if (version >= 17) {
+                return randomSelect(config.fbdvRules['iOS 17']);
+            } else if (version >= 16) {
+                return randomSelect(config.fbdvRules['iOS 16']);
+            } else {
+                return randomSelect(config.fbdvRules['iOS 15']);
+            }
+        }
+
+        // Convert OS version to FBSV format
+        function getSystemVersion(osVersion) {
+            return osVersion.replace('OS ', '').replace(/_/g, '.');
+        }
+
+        // Generate a single user agent
+        function generateUserAgent() {
+            const osVersion = randomSelect(config.osVersions);
+            const mobileToken = config.mobileTokens[osVersion];
+            const fbav = randomSelect(config.fbavOptions);
+            const fbbv = randomSelect(config.fbbvOptions);
+            const fbdv = getFBDV(osVersion);
+            const fbsv = getSystemVersion(osVersion);
+            const fbrv = randomSelect(config.fbrvOptions);
+
+            const template = `Mozilla/5.0 (iPhone; CPU iPhone ${osVersion} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) ${mobileToken} [FBAN/FBIOS;FBAV/${fbav};FBBV/${fbbv};FBDV/${fbdv};FBMD/iPhone;FBSN/iOS;FBSV/${fbsv};FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBRV/${fbrv};IABMV/1]`;
+
+            return template;
+        }
+
+        // Generate multiple unique user agents
+        function generateMultipleUserAgents(quantity) {
+            const userAgents = new Set();
+            const maxAttempts = quantity * 10; // Prevent infinite loops
+            let attempts = 0;
+
+            while (userAgents.size < quantity && attempts < maxAttempts) {
+                userAgents.add(generateUserAgent());
+                attempts++;
+            }
+
+            return Array.from(userAgents);
+        }
+
+        // Display results
+        function displayResults(userAgents) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (userAgents.length === 0) {
+                resultsDiv.innerHTML = '<p class="text-gray-500 text-center italic">No user agents generated yet.</p>';
+                return;
+            }
+
+            let html = '';
+            userAgents.forEach((ua, index) => {
+                html += `<div class="user-agent-item mb-3 p-3 bg-white rounded border border-gray-200 shadow-sm">
+                    <div class="text-xs text-gray-500 mb-1">User Agent #${index + 1}</div>
+                    <div class="text-gray-800">${ua}</div>
+                </div>`;
+            });
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard() {
+            try {
+                const text = generatedUserAgents.join('\n');
+                await navigator.clipboard.writeText(text);
+                
+                const button = document.getElementById('copyBtn');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
+                button.classList.remove('bg-green-500', 'hover:bg-green-600');
+                button.classList.add('bg-green-600');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.classList.remove('bg-green-600');
+                    button.classList.add('bg-green-500', 'hover:bg-green-600');
+                }, 2000);
+            } catch (err) {
+                alert('Failed to copy to clipboard');
+            }
+        }
+
+        // Download as text file
+        function downloadAsTextFile() {
+            const text = generatedUserAgents.join('\n');
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `iphone_user_agents_${new Date().getTime()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Update counter
+        function updateCounter() {
+            const count = generatedUserAgents.length;
+            document.getElementById('generatedCount').textContent = `${count} user agent${count !== 1 ? 's' : ''} generated`;
+        }
+
+        // Main generation function
+        async function generateUserAgents() {
+            const quantityInput = document.getElementById('quantity');
+            const quantity = parseInt(quantityInput.value);
+            
+            if (isNaN(quantity) || quantity < 1 || quantity > 1000) {
+                alert('Please enter a valid quantity between 1 and 1000');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingSpinner').classList.remove('hidden');
+            document.getElementById('generateBtn').disabled = true;
+
+            // Simulate processing time for large batches
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            try {
+                generatedUserAgents = generateMultipleUserAgents(quantity);
+                displayResults(generatedUserAgents);
+                updateCounter();
+                
+                // Enable action buttons
+                document.getElementById('copyBtn').disabled = false;
+                document.getElementById('downloadBtn').disabled = false;
+                
+            } catch (error) {
+                alert('Error generating user agents: ' + error.message);
+            } finally {
+                // Hide loading
+                document.getElementById('loadingSpinner').classList.add('hidden');
+                document.getElementById('generateBtn').disabled = false;
+            }
+        }
+
+        // Event listeners
+        document.getElementById('generateBtn').addEventListener('click', generateUserAgents);
+        document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+        document.getElementById('downloadBtn').addEventListener('click', downloadAsTextFile);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeConfig();
+            updateCounter();
+        });
+
+        // Allow Enter key to generate
+        document.getElementById('quantity').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateUserAgents();
+            }
+        });
+    </script>
+</body>
+</html>
