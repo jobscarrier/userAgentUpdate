@@ -3,509 +3,686 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iPhone User-Agent Generator</title>
+    <title>Enhanced iPhone User-Agent Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.25);
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .glass-effect { 
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        .input-group {
-            transition: all 0.3s ease;
+        .code-font { font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace; }
+        .animate-pulse-slow { animation: pulse 3s ease-in-out infinite; }
+        .progress-bar {
+            background: linear-gradient(90deg, #4ade80 0%, #22c55e 100%);
+            height: 4px;
+            border-radius: 2px;
+            transition: width 0.3s ease;
         }
-        .input-group:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        }
-        .tag {
-            display: inline-block;
-            background: #4f46e5;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin: 2px;
-            font-size: 12px;
-        }
-        .tag .remove-tag {
-            margin-left: 8px;
-            cursor: pointer;
-            opacity: 0.7;
-        }
-        .tag .remove-tag:hover {
-            opacity: 1;
-        }
-        .output-area {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        .pulse-animation {
-            animation: pulse 2s infinite;
-        }
+        .preset-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .validation-error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }
+        .validation-success { border-color: #10b981 !important; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important; }
+        .toast { transform: translateX(100%); transition: transform 0.3s ease; }
+        .toast.show { transform: translateX(0); }
+        .export-options { display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .export-options.show { display: block; opacity: 1; }
     </style>
 </head>
 <body class="min-h-screen gradient-bg">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
+    <!-- Header -->
+    <div class="container mx-auto px-4 py-6">
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-white mb-4">
-                <i class="fas fa-mobile-alt mr-3"></i>iPhone User-Agent Generator
-            </h1>
-            <p class="text-white opacity-90 text-lg">Generate unlimited unique iPhone user agents with customizable parameters</p>
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-white rounded-full shadow-lg mb-4">
+                <i class="fas fa-mobile-alt text-2xl text-indigo-600"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-2">iPhone User-Agent Generator</h1>
+            <p class="text-indigo-100 text-lg">Professional tool for generating authentic iPhone user agents</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Input Section -->
-            <div class="glass-effect rounded-2xl p-6">
-                <h2 class="text-2xl font-bold text-white mb-6">
-                    <i class="fas fa-cogs mr-2"></i>Configuration
-                </h2>
-
-                <!-- Base User Agent -->
-                <div class="input-group bg-white rounded-xl p-4 mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-code mr-2"></i>Base User Agent (Optional)
-                    </label>
-                    <textarea id="baseUserAgent" class="w-full p-3 border border-gray-300 rounded-lg resize-none" rows="3" placeholder="Leave empty to use default iPhone user agent template"></textarea>
-                </div>
-
-                <!-- Quantity -->
-                <div class="input-group bg-white rounded-xl p-4 mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-hashtag mr-2"></i>Quantity to Generate
-                    </label>
-                    <input type="number" id="quantity" class="w-full p-3 border border-gray-300 rounded-lg" value="10" min="1" max="1000">
-                </div>
-
-                <!-- OS Version -->
-                <div class="input-group bg-white rounded-xl p-4 mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fab fa-apple mr-2"></i>iOS Version
-                    </label>
-                    <input type="text" id="osVersion" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="e.g., 18_3_1" value="17_3_1">
-                    <small class="text-gray-500">Format: X_Y_Z (e.g., 18_3_1, 17_5_2)</small>
-                </div>
-
-                <!-- Mobile Token -->
-                <div class="input-group bg-white rounded-xl p-4 mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-key mr-2"></i>Mobile Token
-                    </label>
-                    <input type="text" id="mobileToken" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="e.g., Mobile/22F76" value="Mobile/21D61">
-                </div>
-
-                <!-- FBDV Selector -->
-                <div class="input-group bg-white rounded-xl p-4 mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-mobile mr-2"></i>FBDV (Device Model)
-                    </label>
-                    <input type="text" id="fbdvInput" class="w-full p-3 border border-gray-300 rounded-lg mb-2" placeholder="Add FBDV (e.g., iPhone14,2)">
-                    <button onclick="addFBDV()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300">
-                        <i class="fas fa-plus mr-2"></i>Add FBDV
-                    </button>
-                    <div id="fbdvTags" class="mt-3">
-                        <span class="tag">iPhone14,2<span class="remove-tag" onclick="removeTag(event)">×</span></span>
-                        <span class="tag">iPhone14,3<span class="remove-tag" onclick="removeTag(event)">×</span></span>
-                        <span class="tag">iPhone14,4<span class="remove-tag" onclick="removeTag(event)">×</span></span>
-                        <span class="tag">iPhone14,5<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            
+            <!-- Left Column - Presets & Parsing -->
+            <div class="xl:col-span-1 space-y-6">
+                <!-- Preset Templates -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-star text-yellow-500 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Quick Presets</h2>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="preset-card p-3 bg-blue-50 rounded-lg border-2 border-blue-200 cursor-pointer transition-all duration-200" data-preset="ios18">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-blue-800">iOS 18.3.1</div>
+                                    <div class="text-sm text-blue-600">Latest iPhone Models</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-blue-400"></i>
+                            </div>
+                        </div>
+                        <div class="preset-card p-3 bg-green-50 rounded-lg border-2 border-green-200 cursor-pointer transition-all duration-200" data-preset="ios17">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-green-800">iOS 17.x</div>
+                                    <div class="text-sm text-green-600">iPhone 14 Series</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-green-400"></i>
+                            </div>
+                        </div>
+                        <div class="preset-card p-3 bg-purple-50 rounded-lg border-2 border-purple-200 cursor-pointer transition-all duration-200" data-preset="ios16">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-purple-800">iOS 16.x</div>
+                                    <div class="text-sm text-purple-600">iPhone 13 Series</div>
+                                </div>
+                                <i class="fas fa-chevron-right text-purple-400"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- FBAV Pool -->
-                <div class="input-group bg-white rounded-xl p-4 mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fab fa-facebook mr-2"></i>FBAV Versions Pool
-                    </label>
-                    <input type="text" id="fbavInput" class="w-full p-3 border border-gray-300 rounded-lg mb-2" placeholder="Add FBAV version (e.g., 440.0.0.43.114)">
-                    <button onclick="addFBAV()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300">
-                        <i class="fas fa-plus mr-2"></i>Add FBAV
-                    </button>
-                    <div id="fbavTags" class="mt-3">
-                        <span class="tag">440.0.0.43.114<span class="remove-tag" onclick="removeTag(event)">×</span></span>
-                        <span class="tag">441.0.0.29.114<span class="remove-tag" onclick="removeTag(event)">×</span></span>
-                        <span class="tag">439.0.0.32.114<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                <!-- Parse Existing User Agent -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-paste text-indigo-500 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Parse & Auto-Fill</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Paste User Agent</label>
+                            <textarea id="base-user-agent" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 code-font text-sm" rows="4" placeholder="Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_1 like Mac OS X) ..."></textarea>
+                        </div>
+                        <button id="parse-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200">
+                            <i class="fas fa-magic mr-2"></i>
+                            Parse & Fill Form
+                        </button>
                     </div>
                 </div>
 
-                <!-- FBRV Pool -->
-                <div class="input-group bg-white rounded-xl p-4 mb-6">
-                    <label class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-code-branch mr-2"></i>FBRV Versions Pool
-                    </label>
-                    <input type="text" id="fbrvInput" class="w-full p-3 border border-gray-300 rounded-lg mb-2" placeholder="Add FBRV version (e.g., 456789012)">
-                    <button onclick="addFBRV()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition duration-300">
-                        <i class="fas fa-plus mr-2"></i>Add FBRV
-                    </button>
-                    <div id="fbrvTags" class="mt-3">
-                        <span class="tag">456789012<span class="remove-tag" onclick="removeTag(event)">×</span></span>
-                        <span class="tag">456789013<span class="remove-tag" onclick="removeTag(event)">×</span></span>
-                        <span class="tag">456789014<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                <!-- Advanced Options -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-cogs text-gray-500 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Advanced Options</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-700">Randomize Order</label>
+                            <input type="checkbox" id="randomize-order" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-gray-700">Include Duplicates</label>
+                            <input type="checkbox" id="allow-duplicates" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Export Format</label>
+                            <select id="export-format" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <option value="txt">Plain Text (.txt)</option>
+                                <option value="json">JSON Array (.json)</option>
+                                <option value="csv">CSV Format (.csv)</option>
+                                <option value="xml">XML Format (.xml)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column - Configuration -->
+            <div class="xl:col-span-1 space-y-6">
+                <!-- Basic Configuration -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-sliders-h text-blue-500 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Configuration</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-code-branch mr-1"></i>
+                                OS Version (FBSV)
+                            </label>
+                            <input type="text" id="os-version" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., 18.3.1">
+                            <div id="os-version-feedback" class="text-xs mt-1"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-mobile mr-1"></i>
+                                Mobile Token
+                            </label>
+                            <input type="text" id="mobile-token" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Mobile/22F76">
+                            <div id="mobile-token-feedback" class="text-xs mt-1"></div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-hashtag mr-1"></i>
+                                Quantity to Generate
+                            </label>
+                            <input type="number" id="quantity" value="20" min="1" max="1000" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <div class="text-xs text-gray-500 mt-1">Generate 1-1000 unique user agents</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Device Pool Configuration -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-layer-group text-green-500 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Device Pools</h2>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Device Models (FBDV)
+                                <span class="text-indigo-600" id="fbdv-count">(0)</span>
+                            </label>
+                            <textarea id="fbdv-versions" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 code-font text-sm" rows="2" placeholder="iPhone14,4, iPhone14,5, iPhone15,2"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                App Versions (FBAV)
+                                <span class="text-indigo-600" id="fbav-count">(0)</span>
+                            </label>
+                            <textarea id="fbav-versions" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 code-font text-sm" rows="2" placeholder="445.0.0.33.117, 446.0.0.35.125"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Build Revisions (FBRV)
+                                <span class="text-indigo-600" id="fbrv-count">(0)</span>
+                            </label>
+                            <textarea id="fbrv-versions" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 code-font text-sm" rows="2" placeholder="618815498, 618815499, 618815500"></textarea>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Generate Button -->
-                <button onclick="generateUserAgents()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-4 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition duration-300">
-                    <i class="fas fa-magic mr-2"></i>Generate User Agents
-                </button>
-
-                <!-- Save/Load Configuration -->
-                <div class="flex gap-4 mt-4">
-                    <button onclick="saveConfig()" class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300">
-                        <i class="fas fa-save mr-2"></i>Save Config
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <button id="generate-btn" class="w-full bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-rocket mr-2"></i>
+                        <span id="generate-text">Generate User Agents</span>
+                        <div id="generate-spinner" class="hidden ml-2">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </div>
                     </button>
-                    <button onclick="loadConfig()" class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300">
-                        <i class="fas fa-upload mr-2"></i>Load Config
-                    </button>
+                    <div id="generation-progress" class="mt-3 hidden">
+                        <div class="flex justify-between text-sm text-gray-600 mb-1">
+                            <span>Generating...</span>
+                            <span id="progress-text">0%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div id="progress-bar" class="progress-bar w-0"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Output Section -->
-            <div class="glass-effect rounded-2xl p-6">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-white">
-                        <i class="fas fa-list mr-2"></i>Generated User Agents
-                    </h2>
-                    <span id="generatedCount" class="bg-white text-gray-800 px-3 py-1 rounded-full font-semibold">0</span>
+            <!-- Right Column - Output -->
+            <div class="xl:col-span-1 space-y-6">
+                <!-- Generated Output -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-file-code text-purple-500 mr-2"></i>
+                            <h2 class="text-xl font-semibold text-gray-800">Generated Agents</h2>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span id="output-count" class="text-sm text-gray-600">0 agents</span>
+                            <button id="clear-output" class="text-red-500 hover:text-red-700 transition-colors duration-200" title="Clear output">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <textarea id="user-agents-output" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 code-font text-sm bg-gray-50" rows="20" readonly placeholder="Your generated user agents will appear here..."></textarea>
+                        <div id="output-placeholder" class="absolute inset-0 flex items-center justify-center text-gray-400 pointer-events-none">
+                            <div class="text-center">
+                                <i class="fas fa-code text-4xl mb-2 opacity-50"></i>
+                                <p>Generated user agents will appear here</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Output Controls -->
-                <div class="flex gap-4 mb-4">
-                    <button onclick="copyAllToClipboard()" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
-                        <i class="fas fa-copy mr-2"></i>Copy All
-                    </button>
-                    <button onclick="downloadAsFile()" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300">
-                        <i class="fas fa-download mr-2"></i>Download .txt
-                    </button>
-                    <button onclick="clearOutput()" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">
-                        <i class="fas fa-trash mr-2"></i>Clear
-                    </button>
-                </div>
-
-                <!-- Output Area -->
-                <div class="bg-white rounded-xl p-4 output-area">
-                    <div id="outputArea" class="font-mono text-sm text-gray-800">
-                        <p class="text-gray-500 text-center py-8">
-                            <i class="fas fa-arrow-left mr-2"></i>Configure settings and click "Generate User Agents" to start
-                        </p>
+                <!-- Export Options -->
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-download text-orange-500 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Export Options</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="copy-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200" disabled>
+                            <i class="fas fa-copy mr-2"></i>
+                            Copy
+                        </button>
+                        <button id="download-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200" disabled>
+                            <i class="fas fa-download mr-2"></i>
+                            Download
+                        </button>
+                        <button id="share-btn" class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200" disabled>
+                            <i class="fas fa-share-alt mr-2"></i>
+                            Share
+                        </button>
+                        <button id="preview-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors duration-200" disabled>
+                            <i class="fas fa-eye mr-2"></i>
+                            Preview
+                        </button>
                     </div>
                 </div>
 
                 <!-- Statistics -->
-                <div id="statsArea" class="mt-4 bg-white bg-opacity-20 rounded-xl p-4 text-white" style="display: none;">
-                    <h3 class="font-semibold mb-2">Generation Statistics:</h3>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>Total Generated: <span id="statTotal">0</span></div>
-                        <div>Unique Count: <span id="statUnique">0</span></div>
-                        <div>FBDV Variations: <span id="statFBDV">0</span></div>
-                        <div>FBAV Variations: <span id="statFBAV">0</span></div>
+                <div class="glass-effect rounded-xl p-6 shadow-xl">
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-chart-bar text-teal-500 mr-2"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Statistics</h2>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center p-3 bg-blue-50 rounded-lg">
+                            <div class="text-2xl font-bold text-blue-600" id="stat-generated">0</div>
+                            <div class="text-sm text-blue-500">Generated</div>
+                        </div>
+                        <div class="text-center p-3 bg-green-50 rounded-lg">
+                            <div class="text-2xl font-bold text-green-600" id="stat-unique">0</div>
+                            <div class="text-sm text-green-500">Unique</div>
+                        </div>
+                        <div class="text-center p-3 bg-purple-50 rounded-lg">
+                            <div class="text-2xl font-bold text-purple-600" id="stat-devices">0</div>
+                            <div class="text-sm text-purple-500">Devices</div>
+                        </div>
+                        <div class="text-center p-3 bg-orange-50 rounded-lg">
+                            <div class="text-2xl font-bold text-orange-600" id="stat-versions">0</div>
+                            <div class="text-sm text-orange-500">Versions</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Hidden file input for config loading -->
-    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="handleFileLoad(event)">
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
     <script>
-        let generatedUserAgents = [];
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const dom = {
+                parseBtn: document.getElementById('parse-btn'),
+                generateBtn: document.getElementById('generate-btn'),
+                copyBtn: document.getElementById('copy-btn'),
+                downloadBtn: document.getElementById('download-btn'),
+                shareBtn: document.getElementById('share-btn'),
+                previewBtn: document.getElementById('preview-btn'),
+                clearOutputBtn: document.getElementById('clear-output'),
+                baseUaInput: document.getElementById('base-user-agent'),
+                osVersionInput: document.getElementById('os-version'),
+                mobileTokenInput: document.getElementById('mobile-token'),
+                fbdvPoolInput: document.getElementById('fbdv-versions'),
+                fbavPoolInput: document.getElementById('fbav-versions'),
+                fbrvPoolInput: document.getElementById('fbrv-versions'),
+                quantityInput: document.getElementById('quantity'),
+                outputArea: document.getElementById('user-agents-output'),
+                outputPlaceholder: document.getElementById('output-placeholder'),
+                outputCount: document.getElementById('output-count'),
+                exportFormat: document.getElementById('export-format'),
+                randomizeOrder: document.getElementById('randomize-order'),
+                allowDuplicates: document.getElementById('allow-duplicates'),
+                generateSpinner: document.getElementById('generate-spinner'),
+                generateText: document.getElementById('generate-text'),
+                generationProgress: document.getElementById('generation-progress'),
+                progressBar: document.getElementById('progress-bar'),
+                progressText: document.getElementById('progress-text'),
+                fbdvCount: document.getElementById('fbdv-count'),
+                fbavCount: document.getElementById('fbav-count'),
+                fbrvCount: document.getElementById('fbrv-count'),
+                statGenerated: document.getElementById('stat-generated'),
+                statUnique: document.getElementById('stat-unique'),
+                statDevices: document.getElementById('stat-devices'),
+                statVersions: document.getElementById('stat-versions'),
+                toastContainer: document.getElementById('toast-container')
+            };
 
-        // Default user agent template
-        const defaultTemplate = "Mozilla/5.0 (iPhone; CPU iPhone OS {OS_VERSION} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) {MOBILE_TOKEN} [FBAN/FBIOS;FBDV/{FBDV};FBMD/iPhone;FBSN/iOS;FBSV/{FBSV};FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBCR/;FBAV/{FBAV};FBBV/{FBBV};FBRV/{FBRV}]";
+            // Preset templates
+            const presets = {
+                ios18: {
+                    osVersion: '18.3.1',
+                    mobileToken: 'Mobile/22F76',
+                    fbdv: 'iPhone14,4,iPhone14,5,iPhone14,7,iPhone14,8,iPhone15,2,iPhone15,3,iPhone15,4,iPhone15,5',
+                    fbav: '445.0.0.33.117,446.0.0.35.125,447.0.0.37.131,448.0.0.39.140',
+                    fbrv: '618815498,618815499,618815500,618815501,618815502'
+                },
+                ios17: {
+                    osVersion: '17.6.1',
+                    mobileToken: 'Mobile/21G93',
+                    fbdv: 'iPhone14,2,iPhone14,3,iPhone14,4,iPhone14,5,iPhone14,7,iPhone14,8',
+                    fbav: '440.0.0.29.96,441.0.0.31.104,442.0.0.33.112,443.0.0.35.120',
+                    fbrv: '618815488,618815489,618815490,618815491,618815492'
+                },
+                ios16: {
+                    osVersion: '16.7.10',
+                    mobileToken: 'Mobile/20H350',
+                    fbdv: 'iPhone13,1,iPhone13,2,iPhone13,3,iPhone13,4,iPhone14,2,iPhone14,3',
+                    fbav: '435.0.0.25.88,436.0.0.27.96,437.0.0.29.104,438.0.0.31.112',
+                    fbrv: '618815478,618815479,618815480,618815481,618815482'
+                }
+            };
 
-        // Add functions for managing tags
-        function addFBDV() {
-            const input = document.getElementById('fbdvInput');
-            const value = input.value.trim();
-            if (value) {
-                addTag('fbdvTags', value);
-                input.value = '';
-            }
-        }
+            // Utility functions
+            const showToast = (message, type = 'success') => {
+                const toast = document.createElement('div');
+                toast.className = `toast p-4 rounded-lg shadow-lg text-white flex items-center space-x-3 ${
+                    type === 'success' ? 'bg-green-500' : 
+                    type === 'error' ? 'bg-red-500' : 
+                    type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+                }`;
+                
+                const icon = type === 'success' ? 'fa-check-circle' : 
+                           type === 'error' ? 'fa-exclamation-circle' : 
+                           type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+                
+                toast.innerHTML = `
+                    <i class="fas ${icon}"></i>
+                    <span>${message}</span>
+                    <button class="ml-auto text-white hover:text-gray-200" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                dom.toastContainer.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+            };
 
-        function addFBAV() {
-            const input = document.getElementById('fbavInput');
-            const value = input.value.trim();
-            if (value) {
-                addTag('fbavTags', value);
-                input.value = '';
-            }
-        }
+            const validateInput = (input, feedbackElement, validator, successMessage, errorMessage) => {
+                const value = input.value.trim();
+                const isValid = validator(value);
+                
+                input.classList.remove('validation-error', 'validation-success');
+                input.classList.add(isValid ? 'validation-success' : 'validation-error');
+                
+                feedbackElement.textContent = isValid ? successMessage : errorMessage;
+                feedbackElement.className = `text-xs mt-1 ${isValid ? 'text-green-600' : 'text-red-600'}`;
+                
+                return isValid;
+            };
 
-        function addFBRV() {
-            const input = document.getElementById('fbrvInput');
-            const value = input.value.trim();
-            if (value) {
-                addTag('fbrvTags', value);
-                input.value = '';
-            }
-        }
+            const updatePoolCounts = () => {
+                const getCount = (input) => input.value.split(',').filter(s => s.trim()).length;
+                dom.fbdvCount.textContent = `(${getCount(dom.fbdvPoolInput)})`;
+                dom.fbavCount.textContent = `(${getCount(dom.fbavPoolInput)})`;
+                dom.fbrvCount.textContent = `(${getCount(dom.fbrvPoolInput)})`;
+            };
 
-        function addTag(containerId, value) {
-            const container = document.getElementById(containerId);
-            const tag = document.createElement('span');
-            tag.className = 'tag';
-            tag.innerHTML = `${value}<span class="remove-tag" onclick="removeTag(event)">×</span>`;
-            container.appendChild(tag);
-        }
+            const updateOutputState = () => {
+                const hasOutput = dom.outputArea.value.trim().length > 0;
+                const count = hasOutput ? dom.outputArea.value.split('\n\n').filter(s => s.trim()).length : 0;
+                
+                dom.outputCount.textContent = `${count} agents`;
+                dom.outputPlaceholder.style.display = hasOutput ? 'none' : 'flex';
+                
+                [dom.copyBtn, dom.downloadBtn, dom.shareBtn, dom.previewBtn].forEach(btn => {
+                    btn.disabled = !hasOutput;
+                    btn.classList.toggle('opacity-50', !hasOutput);
+                    btn.classList.toggle('cursor-not-allowed', !hasOutput);
+                });
+            };
 
-        function removeTag(event) {
-            event.target.parentElement.remove();
-        }
+            const updateStatistics = (generated, unique, devices, versions) => {
+                dom.statGenerated.textContent = generated;
+                dom.statUnique.textContent = unique;
+                dom.statDevices.textContent = devices;
+                dom.statVersions.textContent = versions;
+            };
 
-        function getTags(containerId) {
-            const container = document.getElementById(containerId);
-            const tags = container.querySelectorAll('.tag');
-            return Array.from(tags).map(tag => tag.textContent.slice(0, -1)); // Remove the × character
-        }
+            const showProgress = (show, progress = 0) => {
+                dom.generationProgress.classList.toggle('hidden', !show);
+                dom.generateSpinner.classList.toggle('hidden', !show);
+                dom.generateText.textContent = show ? 'Generating...' : 'Generate User Agents';
+                dom.generateBtn.disabled = show;
+                
+                if (show) {
+                    dom.progressBar.style.width = `${progress}%`;
+                    dom.progressText.textContent = `${Math.round(progress)}%`;
+                }
+            };
 
-        function generateRandomFBBV() {
-            return Math.floor(Math.random() * 900000000) + 100000000; // 9-digit number
-        }
+            // Event Listeners
+            document.querySelectorAll('.preset-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const preset = presets[card.dataset.preset];
+                    if (preset) {
+                        dom.osVersionInput.value = preset.osVersion;
+                        dom.mobileTokenInput.value = preset.mobileToken;
+                        dom.fbdvPoolInput.value = preset.fbdv;
+                        dom.fbavPoolInput.value = preset.fbav;
+                        dom.fbrvPoolInput.value = preset.fbrv;
+                        updatePoolCounts();
+                        showToast(`Applied ${card.dataset.preset.toUpperCase()} preset template`);
+                    }
+                });
+            });
 
-        function generateUserAgents() {
-            const quantity = parseInt(document.getElementById('quantity').value) || 10;
-            const baseUserAgent = document.getElementById('baseUserAgent').value.trim();
-            const osVersion = document.getElementById('osVersion').value.trim() || '17_3_1';
-            const mobileToken = document.getElementById('mobileToken').value.trim() || 'Mobile/21D61';
-            
-            const fbdvList = getTags('fbdvTags');
-            const fbavList = getTags('fbavTags');
-            const fbrvList = getTags('fbrvTags');
+            dom.parseBtn.addEventListener('click', () => {
+                const ua = dom.baseUaInput.value.trim();
+                if (!ua) {
+                    showToast('Please paste a user agent first.', 'error');
+                    return;
+                }
+                
+                const patterns = {
+                    fbsv: /FBSV\/([0-9._]+)/,
+                    mobile: /\) (Mobile\/[a-zA-Z0-9]+) \[FBAN/,
+                    fbdv: /FBDV\/([^;]+)/,
+                    fbav: /FBAV\/([^;]+)/,
+                    fbrv: /FBRV\/([0-9]+)/
+                };
 
-            if (fbdvList.length === 0 || fbavList.length === 0 || fbrvList.length === 0) {
-                alert('Please add at least one item to each pool (FBDV, FBAV, FBRV)');
-                return;
-            }
+                const getMatch = (pattern) => (ua.match(pattern) || [])[1] || '';
+                const parsed = {
+                    fbsv: getMatch(patterns.fbsv),
+                    mobile: getMatch(patterns.mobile),
+                    fbdv: getMatch(patterns.fbdv),
+                    fbav: getMatch(patterns.fbav),
+                    fbrv: getMatch(patterns.fbrv),
+                };
 
-            const template = baseUserAgent || defaultTemplate;
-            const fbsv = osVersion.replace(/_/g, '.'); // Convert OS version format for FBSV
-            
-            generatedUserAgents = [];
-            const usedCombinations = new Set();
+                if (!parsed.fbsv && !parsed.fbdv) {
+                    showToast('Could not parse. Invalid user agent format.', 'error');
+                    return;
+                }
 
-            // Show loading state
-            const outputArea = document.getElementById('outputArea');
-            outputArea.innerHTML = '<div class="text-center py-8 pulse-animation"><i class="fas fa-spinner fa-spin mr-2"></i>Generating user agents...</div>';
+                dom.osVersionInput.value = parsed.fbsv;
+                dom.mobileTokenInput.value = parsed.mobile;
+                dom.fbdvPoolInput.value = parsed.fbdv;
+                dom.fbavPoolInput.value = parsed.fbav;
+                dom.fbrvPoolInput.value = parsed.fbrv;
+                updatePoolCounts();
+                showToast('Form pre-filled successfully from parsed user agent!');
+            });
 
-            setTimeout(() => {
-                for (let i = 0; i < quantity; i++) {
-                    let userAgent;
-                    let combination;
+            dom.generateBtn.addEventListener('click', async () => {
+                const getPool = (input) => input.value.split(',').map(s => s.trim()).filter(Boolean);
+                
+                const params = {
+                    osVersion: dom.osVersionInput.value.trim(),
+                    mobileToken: dom.mobileTokenInput.value.trim(),
+                    quantity: parseInt(dom.quantityInput.value, 10),
+                    fbdvPool: getPool(dom.fbdvPoolInput),
+                    fbavPool: getPool(dom.fbavPoolInput),
+                    fbrvPool: getPool(dom.fbrvPoolInput),
+                    randomize: dom.randomizeOrder.checked,
+                    allowDuplicates: dom.allowDuplicates.checked
+                };
+
+                // Validation
+                if (!params.osVersion || !params.mobileToken || !params.quantity || 
+                    params.fbdvPool.length === 0 || params.fbavPool.length === 0 || params.fbrvPool.length === 0) {
+                    showToast('All fields and pools must be filled.', 'error');
+                    return;
+                }
+
+                showProgress(true, 0);
+                
+                try {
+                    const userAgents = new Set();
+                    const iosUaVersion = params.osVersion.replace(/\./g, '_');
                     let attempts = 0;
-                    const maxAttempts = 1000;
+                    const maxAttempts = params.quantity * 20;
+                    const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-                    do {
-                        const fbdv = fbdvList[Math.floor(Math.random() * fbdvList.length)];
-                        const fbav = fbavList[Math.floor(Math.random() * fbavList.length)];
-                        const fbrv = fbrvList[Math.floor(Math.random() * fbrvList.length)];
-                        const fbbv = generateRandomFBBV();
+                    // Simulate progress for better UX
+                    const progressInterval = setInterval(() => {
+                        const currentProgress = (userAgents.size / params.quantity) * 100;
+                        showProgress(true, Math.min(currentProgress, 90));
+                    }, 100);
 
-                        combination = `${fbdv}-${fbav}-${fbrv}-${fbbv}`;
+                    // Generate user agents
+                    while (userAgents.size < params.quantity && attempts < maxAttempts) {
+                        const fbdv = getRandomElement(params.fbdvPool);
+                        const fbav = getRandomElement(params.fbavPool);
+                        const fbbv = fbav.replace(/\./g, '');
+                        const fbrv = getRandomElement(params.fbrvPool);
+                    
+                        const ua = `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosUaVersion} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) ${params.mobileToken} [FBAN/FBIOS;FBAV/${fbav};FBBV/${fbbv};FBDV/${fbdv};FBMD/iPhone;FBSN/iOS;FBSV/${params.osVersion};FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBRV/${fbrv}]`;
                         
-                        if (!usedCombinations.has(combination)) {
-                            usedCombinations.add(combination);
-                            
-                            userAgent = template
-                                .replace('{OS_VERSION}', osVersion)
-                                .replace('{MOBILE_TOKEN}', mobileToken)
-                                .replace('{FBDV}', fbdv)
-                                .replace('{FBSV}', fbsv)
-                                .replace('{FBAV}', fbav)
-                                .replace('{FBBV}', fbbv)
-                                .replace('{FBRV}', fbrv);
-                            
-                            break;
+                        if (params.allowDuplicates || !userAgents.has(ua)) {
+                            userAgents.add(ua);
                         }
                         attempts++;
-                    } while (attempts < maxAttempts);
-
-                    if (userAgent) {
-                        generatedUserAgents.push(userAgent);
                     }
-                }
 
-                displayUserAgents();
-                updateStatistics();
-            }, 500);
-        }
+                    clearInterval(progressInterval);
+                    showProgress(true, 100);
 
-        function displayUserAgents() {
-            const outputArea = document.getElementById('outputArea');
-            const generatedCount = document.getElementById('generatedCount');
-            
-            if (generatedUserAgents.length === 0) {
-                outputArea.innerHTML = '<p class="text-gray-500 text-center py-8">No user agents generated</p>';
-                generatedCount.textContent = '0';
-                return;
-            }
-
-            const output = generatedUserAgents.map((ua, index) => 
-                `<div class="mb-2 p-2 bg-gray-50 rounded border-l-4 border-blue-500">
-                    <div class="text-xs text-gray-500 mb-1">#${index + 1}</div>
-                    <div class="break-all">${ua}</div>
-                </div>`
-            ).join('');
-
-            outputArea.innerHTML = output;
-            generatedCount.textContent = generatedUserAgents.length;
-        }
-
-        function updateStatistics() {
-            const statsArea = document.getElementById('statsArea');
-            const fbdvSet = new Set();
-            const fbavSet = new Set();
-
-            generatedUserAgents.forEach(ua => {
-                const fbdvMatch = ua.match(/FBDV\/([^;]+)/);
-                const fbavMatch = ua.match(/FBAV\/([^;]+)/);
-                
-                if (fbdvMatch) fbdvSet.add(fbdvMatch[1]);
-                if (fbavMatch) fbavSet.add(fbavMatch[1]);
-            });
-
-            document.getElementById('statTotal').textContent = generatedUserAgents.length;
-            document.getElementById('statUnique').textContent = generatedUserAgents.length;
-            document.getElementById('statFBDV').textContent = fbdvSet.size;
-            document.getElementById('statFBAV').textContent = fbavSet.size;
-
-            statsArea.style.display = generatedUserAgents.length > 0 ? 'block' : 'none';
-        }
-
-        function copyAllToClipboard() {
-            if (generatedUserAgents.length === 0) {
-                alert('No user agents to copy');
-                return;
-            }
-
-            const text = generatedUserAgents.join('\n');
-            navigator.clipboard.writeText(text).then(() => {
-                const button = event.target.closest('button');
-                const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
-                button.classList.add('bg-green-600');
-                
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.classList.remove('bg-green-600');
-                }, 2000);
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-                alert('Failed to copy to clipboard');
-            });
-        }
-
-        function downloadAsFile() {
-            if (generatedUserAgents.length === 0) {
-                alert('No user agents to download');
-                return;
-            }
-
-            const text = generatedUserAgents.join('\n');
-            const blob = new Blob([text], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            a.href = url;
-            a.download = `iphone_user_agents_${new Date().getTime()}.txt`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
-
-        function clearOutput() {
-            generatedUserAgents = [];
-            displayUserAgents();
-            updateStatistics();
-        }
-
-        function saveConfig() {
-            const config = {
-                baseUserAgent: document.getElementById('baseUserAgent').value,
-                quantity: document.getElementById('quantity').value,
-                osVersion: document.getElementById('osVersion').value,
-                mobileToken: document.getElementById('mobileToken').value,
-                fbdvList: getTags('fbdvTags'),
-                fbavList: getTags('fbavTags'),
-                fbrvList: getTags('fbrvTags')
-            };
-
-            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            
-            a.href = url;
-            a.download = `user_agent_config_${new Date().getTime()}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
-
-        function loadConfig() {
-            document.getElementById('fileInput').click();
-        }
-
-        function handleFileLoad(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const config = JSON.parse(e.target.result);
-                    
-                    // Load basic settings
-                    document.getElementById('baseUserAgent').value = config.baseUserAgent || '';
-                    document.getElementById('quantity').value = config.quantity || 10;
-                    document.getElementById('osVersion').value = config.osVersion || '17_3_1';
-                    document.getElementById('mobileToken').value = config.mobileToken || 'Mobile/21D61';
-                    
-                    // Clear existing tags and load new ones
-                    ['fbdvTags', 'fbavTags', 'fbrvTags'].forEach(id => {
-                        document.getElementById(id).innerHTML = '';
-                    });
-                    
-                    // Load FBDV tags
-                    if (config.fbdvList) {
-                        config.fbdvList.forEach(item => addTag('fbdvTags', item));
+                    // Convert to array and randomize if requested
+                    let result = Array.from(userAgents);
+                    if (params.randomize) {
+                        result = result.sort(() => Math.random() - 0.5);
                     }
-                    
-                    // Load FBAV tags
-                    if (config.fbavList) {
-                        config.fbavList.forEach(item => addTag('fbavTags', item));
-                    }
-                    
-                    // Load FBRV tags
-                    if (config.fbrvList) {
-                        config.fbrvList.forEach(item => addTag('fbrvTags', item));
-                    }
-                    
-                    alert('Configuration loaded successfully!');
+
+                    // Update output
+                    dom.outputArea.value = result.join('\n\n');
+                    updateOutputState();
+                    updateStatistics(
+                        result.length,
+                        userAgents.size,
+                        params.fbdvPool.length,
+                        params.fbavPool.length
+                    );
+
+                    setTimeout(() => {
+                        showProgress(false);
+                        if (userAgents.size < params.quantity && !params.allowDuplicates) {
+                            showToast(`Generated ${userAgents.size}/${params.quantity} unique agents. Consider enabling duplicates for more.`, 'warning');
+                        } else {
+                            showToast(`Successfully generated ${result.length} user agents!`);
+                        }
+                    }, 500);
+
                 } catch (error) {
-                    alert('Error loading configuration file');
-                    console.error(error);
+                    showProgress(false);
+                    showToast('An error occurred during generation.', 'error');
                 }
-            };
-            reader.readAsText(file);
-        }
+            });
 
-        // Add Enter key support for inputs
-        document.getElementById('fbdvInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') addFBDV();
-        });
+            dom.copyBtn.addEventListener('click', async () => {
+                if (!dom.outputArea.value) return;
+                
+                try {
+                    await navigator.clipboard.writeText(dom.outputArea.value);
+                    showToast('Copied all user agents to clipboard!');
+                } catch (error) {
+                    showToast('Failed to copy to clipboard.', 'error');
+                }
+            });
 
-        document.getElementById('fbavInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') addFBAV();
-        });
+            dom.downloadBtn.addEventListener('click', () => {
+                if (!dom.outputArea.value) return;
+                
+                const format = dom.exportFormat.value;
+                let content = dom.outputArea.value;
+                let filename = 'user-agents';
+                let mimeType = 'text/plain';
+                
+                const agents = dom.outputArea.value.split('\n\n').filter(s => s.trim());
+                
+                switch (format) {
+                    case 'json':
+                        content = JSON.stringify(agents, null, 2);
+                        filename += '.json';
+                        mimeType = 'application/json';
+                        break;
+                    case 'csv':
+                        content = 'User-Agent\n' + agents.map(ua => `"${ua}"`).join('\n');
+                        filename += '.csv';
+                        mimeType = 'text/csv';
+                        break;
+                    case 'xml':
+                        content = `<?xml version="1.0" encoding="UTF-8"?>\n<user-agents>\n${agents.map(ua => `  <user-agent>${ua}</user-agent>`).join('\n')}\n</user-agents>`;
+                        filename += '.xml';
+                        mimeType = 'application/xml';
+                        break;
+                    default:
+                        filename += '.txt';
+                }
+                
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast(`Downloaded ${filename} successfully!`);
+            });
 
-        document.getElementById('fbrvInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') addFBRV();
+            dom.clearOutputBtn.addEventListener('click', () => {
+                dom.outputArea.value = '';
+                updateOutputState();
+                updateStatistics(0, 0, 0, 0);
+                showToast('Output cleared');
+            });
+
+            // Input validation
+            dom.osVersionInput.addEventListener('input', () => {
+                const feedback = document.getElementById('os-version-feedback');
+                validateInput(
+                    dom.osVersionInput,
+                    feedback,
+                    (value) => /^\d+\.\d+(\.\d+)?$/.test(value),
+                    '✓ Valid version format',
+                    '✗ Use format like 18.3.1'
+                );
+            });
+
+            dom.mobileTokenInput.addEventListener('input', () => {
+                const feedback = document.getElementById('mobile-token-feedback');
+                validateInput(
+                    dom.mobileTokenInput,
+                    feedback,
+                    (value) => /^Mobile\/[a-zA-Z0-9]+$/.test(value),
+                    '✓ Valid mobile token format',
+                    '✗ Use format like Mobile/22F76'
+                );
+            });
+
+            // Pool count updates
+            [dom.fbdvPoolInput, dom.fbavPoolInput, dom.fbrvPoolInput].forEach(input => {
+                input.addEventListener('input', updatePoolCounts);
+            });
+
+            // Initialize
+            updatePoolCounts();
+            updateOutputState();
+            updateStatistics(0, 0, 0, 0);
         });
     </script>
 </body>
