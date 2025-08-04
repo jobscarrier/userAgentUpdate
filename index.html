@@ -3,498 +3,509 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iPhone User Agent Generator - Facebook iOS App Simulator</title>
+    <title>iPhone User-Agent Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
     <style>
-        .config-section {
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        .input-group {
             transition: all 0.3s ease;
         }
-        .config-section.collapsed {
-            max-height: 60px;
-            overflow: hidden;
+        .input-group:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        .config-section.expanded {
-            max-height: 1000px;
-        }
-        .user-agent-item {
-            font-family: 'Courier New', monospace;
+        .tag {
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin: 2px;
             font-size: 12px;
-            line-height: 1.4;
-            word-break: break-all;
         }
-        .spinner {
-            animation: spin 1s linear infinite;
+        .tag .remove-tag {
+            margin-left: 8px;
+            cursor: pointer;
+            opacity: 0.7;
         }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .tag .remove-tag:hover {
+            opacity: 1;
+        }
+        .output-area {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="min-h-screen gradient-bg">
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">
-                <i class="fab fa-apple text-gray-600"></i>
-                iPhone User Agent Generator
+            <h1 class="text-4xl font-bold text-white mb-4">
+                <i class="fas fa-mobile-alt mr-3"></i>iPhone User-Agent Generator
             </h1>
-            <p class="text-gray-600">Facebook iOS App Simulator with Custom Rules Engine</p>
+            <p class="text-white opacity-90 text-lg">Generate unlimited unique iPhone user agents with customizable parameters</p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Generator Panel -->
-            <div class="lg:col-span-1">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-cogs text-blue-500"></i>
-                        Generator
-                    </h2>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                        <input type="number" id="quantity" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" min="1" max="1000" value="10">
-                    </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Input Section -->
+            <div class="glass-effect rounded-2xl p-6">
+                <h2 class="text-2xl font-bold text-white mb-6">
+                    <i class="fas fa-cogs mr-2"></i>Configuration
+                </h2>
 
-                    <button id="generateBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 mb-4">
-                        <i class="fas fa-magic mr-2"></i>
-                        Generate User Agents
+                <!-- Base User Agent -->
+                <div class="input-group bg-white rounded-xl p-4 mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-code mr-2"></i>Base User Agent (Optional)
+                    </label>
+                    <textarea id="baseUserAgent" class="w-full p-3 border border-gray-300 rounded-lg resize-none" rows="3" placeholder="Leave empty to use default iPhone user agent template"></textarea>
+                </div>
+
+                <!-- Quantity -->
+                <div class="input-group bg-white rounded-xl p-4 mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-hashtag mr-2"></i>Quantity to Generate
+                    </label>
+                    <input type="number" id="quantity" class="w-full p-3 border border-gray-300 rounded-lg" value="10" min="1" max="1000">
+                </div>
+
+                <!-- OS Version -->
+                <div class="input-group bg-white rounded-xl p-4 mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fab fa-apple mr-2"></i>iOS Version
+                    </label>
+                    <input type="text" id="osVersion" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="e.g., 18_3_1" value="17_3_1">
+                    <small class="text-gray-500">Format: X_Y_Z (e.g., 18_3_1, 17_5_2)</small>
+                </div>
+
+                <!-- Mobile Token -->
+                <div class="input-group bg-white rounded-xl p-4 mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-key mr-2"></i>Mobile Token
+                    </label>
+                    <input type="text" id="mobileToken" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="e.g., Mobile/22F76" value="Mobile/21D61">
+                </div>
+
+                <!-- FBDV Selector -->
+                <div class="input-group bg-white rounded-xl p-4 mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-mobile mr-2"></i>FBDV (Device Model)
+                    </label>
+                    <input type="text" id="fbdvInput" class="w-full p-3 border border-gray-300 rounded-lg mb-2" placeholder="Add FBDV (e.g., iPhone14,2)">
+                    <button onclick="addFBDV()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-300">
+                        <i class="fas fa-plus mr-2"></i>Add FBDV
                     </button>
-
-                    <div class="space-y-2">
-                        <button id="copyBtn" class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <i class="fas fa-copy mr-2"></i>
-                            Copy All
-                        </button>
-                        <button id="downloadBtn" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                            <i class="fas fa-download mr-2"></i>
-                            Download as .txt
-                        </button>
-                    </div>
-
-                    <div class="mt-4 text-center">
-                        <span id="generatedCount" class="text-sm text-gray-600">0 user agents generated</span>
+                    <div id="fbdvTags" class="mt-3">
+                        <span class="tag">iPhone14,2<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                        <span class="tag">iPhone14,3<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                        <span class="tag">iPhone14,4<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                        <span class="tag">iPhone14,5<span class="remove-tag" onclick="removeTag(event)">×</span></span>
                     </div>
                 </div>
 
-                <!-- Configuration Panel -->
-                <div class="bg-white rounded-lg shadow-lg p-6 mt-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-edit text-orange-500"></i>
-                        Configuration
-                    </h2>
-
-                    <!-- OS Versions -->
-                    <div class="config-section collapsed mb-4" id="osConfig">
-                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('osConfig')">
-                            <h3 class="text-lg font-medium text-gray-700">OS Versions</h3>
-                            <i class="fas fa-chevron-down transform transition-transform" id="osConfigIcon"></i>
-                        </div>
-                        <div class="mt-3">
-                            <textarea id="osVersions" class="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="One per line..."></textarea>
-                            <button onclick="updateConfig('osVersions')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
-                        </div>
+                <!-- FBAV Pool -->
+                <div class="input-group bg-white rounded-xl p-4 mb-4">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fab fa-facebook mr-2"></i>FBAV Versions Pool
+                    </label>
+                    <input type="text" id="fbavInput" class="w-full p-3 border border-gray-300 rounded-lg mb-2" placeholder="Add FBAV version (e.g., 440.0.0.43.114)">
+                    <button onclick="addFBAV()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300">
+                        <i class="fas fa-plus mr-2"></i>Add FBAV
+                    </button>
+                    <div id="fbavTags" class="mt-3">
+                        <span class="tag">440.0.0.43.114<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                        <span class="tag">441.0.0.29.114<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                        <span class="tag">439.0.0.32.114<span class="remove-tag" onclick="removeTag(event)">×</span></span>
                     </div>
+                </div>
 
-                    <!-- Mobile Tokens -->
-                    <div class="config-section collapsed mb-4" id="mobileConfig">
-                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('mobileConfig')">
-                            <h3 class="text-lg font-medium text-gray-700">Mobile Tokens</h3>
-                            <i class="fas fa-chevron-down transform transition-transform" id="mobileConfigIcon"></i>
-                        </div>
-                        <div class="mt-3">
-                            <textarea id="mobileTokens" class="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="Format: OS 16_1_1:Mobile/20B101"></textarea>
-                            <button onclick="updateConfig('mobileTokens')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
-                        </div>
+                <!-- FBRV Pool -->
+                <div class="input-group bg-white rounded-xl p-4 mb-6">
+                    <label class="block text-gray-700 font-semibold mb-2">
+                        <i class="fas fa-code-branch mr-2"></i>FBRV Versions Pool
+                    </label>
+                    <input type="text" id="fbrvInput" class="w-full p-3 border border-gray-300 rounded-lg mb-2" placeholder="Add FBRV version (e.g., 456789012)">
+                    <button onclick="addFBRV()" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition duration-300">
+                        <i class="fas fa-plus mr-2"></i>Add FBRV
+                    </button>
+                    <div id="fbrvTags" class="mt-3">
+                        <span class="tag">456789012<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                        <span class="tag">456789013<span class="remove-tag" onclick="removeTag(event)">×</span></span>
+                        <span class="tag">456789014<span class="remove-tag" onclick="removeTag(event)">×</span></span>
                     </div>
+                </div>
 
-                    <!-- FBAV Options -->
-                    <div class="config-section collapsed mb-4" id="fbavConfig">
-                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('fbavConfig')">
-                            <h3 class="text-lg font-medium text-gray-700">FBAV Options</h3>
-                            <i class="fas fa-chevron-down transform transition-transform" id="fbavConfigIcon"></i>
-                        </div>
-                        <div class="mt-3">
-                            <textarea id="fbavOptions" class="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="One per line..."></textarea>
-                            <button onclick="updateConfig('fbavOptions')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
-                        </div>
-                    </div>
+                <!-- Generate Button -->
+                <button onclick="generateUserAgents()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-4 px-6 rounded-xl hover:from-indigo-600 hover:to-purple-700 transform hover:scale-105 transition duration-300">
+                    <i class="fas fa-magic mr-2"></i>Generate User Agents
+                </button>
 
-                    <!-- FBBV Options -->
-                    <div class="config-section collapsed mb-4" id="fbbvConfig">
-                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('fbbvConfig')">
-                            <h3 class="text-lg font-medium text-gray-700">FBBV Options</h3>
-                            <i class="fas fa-chevron-down transform transition-transform" id="fbbvConfigIcon"></i>
-                        </div>
-                        <div class="mt-3">
-                            <textarea id="fbbvOptions" class="w-full h-24 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="One per line..."></textarea>
-                            <button onclick="updateConfig('fbbvOptions')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
-                        </div>
-                    </div>
-
-                    <!-- FBDV Rules -->
-                    <div class="config-section collapsed mb-4" id="fbdvConfig">
-                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('fbdvConfig')">
-                            <h3 class="text-lg font-medium text-gray-700">FBDV Rules</h3>
-                            <i class="fas fa-chevron-down transform transition-transform" id="fbdvConfigIcon"></i>
-                        </div>
-                        <div class="mt-3">
-                            <textarea id="fbdvRules" class="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="Format: iOS 18:iPhone17,3,iPhone17,4"></textarea>
-                            <button onclick="updateConfig('fbdvRules')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
-                        </div>
-                    </div>
-
-                    <!-- FBRV Options -->
-                    <div class="config-section collapsed mb-4" id="fbrvConfig">
-                        <div class="flex justify-between items-center cursor-pointer" onclick="toggleConfig('fbrvConfig')">
-                            <h3 class="text-lg font-medium text-gray-700">FBRV Options</h3>
-                            <i class="fas fa-chevron-down transform transition-transform" id="fbrvConfigIcon"></i>
-                        </div>
-                        <div class="mt-3">
-                            <textarea id="fbrvOptions" class="w-full h-32 px-3 py-2 border border-gray-300 rounded-md text-sm font-mono" placeholder="One per line..."></textarea>
-                            <button onclick="updateConfig('fbrvOptions')" class="mt-2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-1 rounded text-sm">Update</button>
-                        </div>
-                    </div>
+                <!-- Save/Load Configuration -->
+                <div class="flex gap-4 mt-4">
+                    <button onclick="saveConfig()" class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300">
+                        <i class="fas fa-save mr-2"></i>Save Config
+                    </button>
+                    <button onclick="loadConfig()" class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300">
+                        <i class="fas fa-upload mr-2"></i>Load Config
+                    </button>
                 </div>
             </div>
 
-            <!-- Results Panel -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-lg shadow-lg p-6">
-                    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
-                        <i class="fas fa-list text-green-500"></i>
-                        Generated User Agents
+            <!-- Output Section -->
+            <div class="glass-effect rounded-2xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-white">
+                        <i class="fas fa-list mr-2"></i>Generated User Agents
                     </h2>
-                    
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm text-gray-600">Results:</span>
-                            <div id="loadingSpinner" class="hidden">
-                                <i class="fas fa-spinner spinner text-blue-500"></i>
-                                <span class="text-blue-500 ml-2">Generating...</span>
-                            </div>
-                        </div>
-                        <div id="results" class="border border-gray-300 rounded-lg p-4 bg-gray-50 h-96 overflow-y-auto">
-                            <p class="text-gray-500 text-center italic">No user agents generated yet. Click "Generate User Agents" to start.</p>
-                        </div>
+                    <span id="generatedCount" class="bg-white text-gray-800 px-3 py-1 rounded-full font-semibold">0</span>
+                </div>
+
+                <!-- Output Controls -->
+                <div class="flex gap-4 mb-4">
+                    <button onclick="copyAllToClipboard()" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+                        <i class="fas fa-copy mr-2"></i>Copy All
+                    </button>
+                    <button onclick="downloadAsFile()" class="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300">
+                        <i class="fas fa-download mr-2"></i>Download .txt
+                    </button>
+                    <button onclick="clearOutput()" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">
+                        <i class="fas fa-trash mr-2"></i>Clear
+                    </button>
+                </div>
+
+                <!-- Output Area -->
+                <div class="bg-white rounded-xl p-4 output-area">
+                    <div id="outputArea" class="font-mono text-sm text-gray-800">
+                        <p class="text-gray-500 text-center py-8">
+                            <i class="fas fa-arrow-left mr-2"></i>Configure settings and click "Generate User Agents" to start
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div id="statsArea" class="mt-4 bg-white bg-opacity-20 rounded-xl p-4 text-white" style="display: none;">
+                    <h3 class="font-semibold mb-2">Generation Statistics:</h3>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div>Total Generated: <span id="statTotal">0</span></div>
+                        <div>Unique Count: <span id="statUnique">0</span></div>
+                        <div>FBDV Variations: <span id="statFBDV">0</span></div>
+                        <div>FBAV Variations: <span id="statFBAV">0</span></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Configuration Data
-        let config = {
-            osVersions: [
-                'OS 16_1_1', 'OS 16_2', 'OS 16_3_1', 'OS 17_0_3', 'OS 17_3_1',
-                'OS 17_5_1', 'OS 17_6_1', 'OS 17_7_1', 'OS 18_1', 'OS 18_1_1',
-                'OS 18_2', 'OS 18_2_1', 'OS 18_3', 'OS 18_3_1', 'OS 18_3_2', 'OS 18_5'
-            ],
-            mobileTokens: {
-                'OS 16_1_1': 'Mobile/20B101',
-                'OS 16_2': 'Mobile/20C65',
-                'OS 16_3_1': 'Mobile/20D67',
-                'OS 17_0_3': 'Mobile/21A360',
-                'OS 17_3_1': 'Mobile/21D61',
-                'OS 17_5_1': 'Mobile/21F90',
-                'OS 17_6_1': 'Mobile/21G93',
-                'OS 17_7_1': 'Mobile/21H216',
-                'OS 18_1': 'Mobile/22B83',
-                'OS 18_1_1': 'Mobile/22B91',
-                'OS 18_2': 'Mobile/22C152',
-                'OS 18_2_1': 'Mobile/22C161',
-                'OS 18_3': 'Mobile/22D5034e',
-                'OS 18_3_1': 'Mobile/22D72',
-                'OS 18_3_2': 'Mobile/22D82',
-                'OS 18_5': 'Mobile/22F76'
-            },
-            fbavOptions: [
-                '521.0.0.42.97', '520.0.0.44.99', '519.0.0.44.92',
-                '523.0.0.39.61', '522.0.0.52.96', '518.0.0.63.86'
-            ],
-            fbbvOptions: [
-                '753726094', '763693145', '760232234', '743277063',
-                '746450682', '735017191', '740881359', '756351453'
-            ],
-            fbdvRules: {
-                'iOS 18': ['iPhone17,3', 'iPhone17,4', 'iPhone17,1', 'iPhone17,2'],
-                'iOS 17': ['iPhone15,4', 'iPhone15,5', 'iPhone16,1', 'iPhone16,2'],
-                'iOS 16': ['iPhone14,7', 'iPhone14,8', 'iPhone15,2', 'iPhone15,3'],
-                'iOS 15': ['iPhone14,4', 'iPhone14,5', 'iPhone14,2', 'iPhone14,3']
-            },
-            fbrvOptions: [
-                '680644226', '680322911', '680469061', '621632390', '681030704',
-                '680568676', '681076370', '681139536', '681201580', '653715064',
-                '681245869', '681417540', '681311148', '681558933', '681788640',
-                '682160012', '681945070', '682241554', '651031300', '682594010',
-                '682651530', '683081814', '682948902', '682998814', '684591905',
-                '684552024', '685547697', '702334248', '709773866', '709959009',
-                '709853509', '710721179', '708854960', '710721179', '711680447',
-                '708854960', '716125254', '715382107', '712354525', '719983960',
-                '719600518', '718473750', '717113040'
-            ]
-        };
+    <!-- Hidden file input for config loading -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="handleFileLoad(event)">
 
+    <script>
         let generatedUserAgents = [];
 
-        // Initialize configuration textareas
-        function initializeConfig() {
-            document.getElementById('osVersions').value = config.osVersions.join('\n');
-            
-            const mobileTokensText = Object.entries(config.mobileTokens)
-                .map(([os, token]) => `${os}:${token}`)
-                .join('\n');
-            document.getElementById('mobileTokens').value = mobileTokensText;
-            
-            document.getElementById('fbavOptions').value = config.fbavOptions.join('\n');
-            document.getElementById('fbbvOptions').value = config.fbbvOptions.join('\n');
-            
-            const fbdvRulesText = Object.entries(config.fbdvRules)
-                .map(([ios, devices]) => `${ios}:${devices.join(',')}`)
-                .join('\n');
-            document.getElementById('fbdvRules').value = fbdvRulesText;
-            
-            document.getElementById('fbrvOptions').value = config.fbrvOptions.join('\n');
-        }
+        // Default user agent template
+        const defaultTemplate = "Mozilla/5.0 (iPhone; CPU iPhone OS {OS_VERSION} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) {MOBILE_TOKEN} [FBAN/FBIOS;FBDV/{FBDV};FBMD/iPhone;FBSN/iOS;FBSV/{FBSV};FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBCR/;FBAV/{FBAV};FBBV/{FBBV};FBRV/{FBRV}]";
 
-        // Toggle configuration sections
-        function toggleConfig(sectionId) {
-            const section = document.getElementById(sectionId);
-            const icon = document.getElementById(sectionId + 'Icon');
-            
-            if (section.classList.contains('collapsed')) {
-                section.classList.remove('collapsed');
-                section.classList.add('expanded');
-                icon.style.transform = 'rotate(180deg)';
-            } else {
-                section.classList.remove('expanded');
-                section.classList.add('collapsed');
-                icon.style.transform = 'rotate(0deg)';
+        // Add functions for managing tags
+        function addFBDV() {
+            const input = document.getElementById('fbdvInput');
+            const value = input.value.trim();
+            if (value) {
+                addTag('fbdvTags', value);
+                input.value = '';
             }
         }
 
-        // Update configuration
-        function updateConfig(configType) {
-            const textarea = document.getElementById(configType);
-            const value = textarea.value.trim();
-            
-            switch(configType) {
-                case 'osVersions':
-                    config.osVersions = value.split('\n').filter(v => v.trim());
-                    break;
-                case 'mobileTokens':
-                    config.mobileTokens = {};
-                    value.split('\n').forEach(line => {
-                        const [os, token] = line.split(':');
-                        if (os && token) {
-                            config.mobileTokens[os.trim()] = token.trim();
-                        }
-                    });
-                    break;
-                case 'fbavOptions':
-                    config.fbavOptions = value.split('\n').filter(v => v.trim());
-                    break;
-                case 'fbbvOptions':
-                    config.fbbvOptions = value.split('\n').filter(v => v.trim());
-                    break;
-                case 'fbdvRules':
-                    config.fbdvRules = {};
-                    value.split('\n').forEach(line => {
-                        const [ios, devices] = line.split(':');
-                        if (ios && devices) {
-                            config.fbdvRules[ios.trim()] = devices.split(',').map(d => d.trim());
-                        }
-                    });
-                    break;
-                case 'fbrvOptions':
-                    config.fbrvOptions = value.split('\n').filter(v => v.trim());
-                    break;
-            }
-            
-            // Show success message
-            const button = textarea.nextElementSibling;
-            const originalText = button.textContent;
-            button.textContent = 'Updated!';
-            button.classList.remove('bg-orange-500', 'hover:bg-orange-600');
-            button.classList.add('bg-green-500', 'hover:bg-green-600');
-            
-            setTimeout(() => {
-                button.textContent = originalText;
-                button.classList.remove('bg-green-500', 'hover:bg-green-600');
-                button.classList.add('bg-orange-500', 'hover:bg-orange-600');
-            }, 2000);
-        }
-
-        // Random selection helper
-        function randomSelect(array) {
-            return array[Math.floor(Math.random() * array.length)];
-        }
-
-        // Get FBDV based on OS version
-        function getFBDV(osVersion) {
-            const version = parseInt(osVersion.split('_')[1]);
-            
-            if (version >= 18) {
-                return randomSelect(config.fbdvRules['iOS 18']);
-            } else if (version >= 17) {
-                return randomSelect(config.fbdvRules['iOS 17']);
-            } else if (version >= 16) {
-                return randomSelect(config.fbdvRules['iOS 16']);
-            } else {
-                return randomSelect(config.fbdvRules['iOS 15']);
+        function addFBAV() {
+            const input = document.getElementById('fbavInput');
+            const value = input.value.trim();
+            if (value) {
+                addTag('fbavTags', value);
+                input.value = '';
             }
         }
 
-        // Convert OS version to FBSV format
-        function getSystemVersion(osVersion) {
-            return osVersion.replace('OS ', '').replace(/_/g, '.');
-        }
-
-        // Generate a single user agent
-        function generateUserAgent() {
-            const osVersion = randomSelect(config.osVersions);
-            const mobileToken = config.mobileTokens[osVersion];
-            const fbav = randomSelect(config.fbavOptions);
-            const fbbv = randomSelect(config.fbbvOptions);
-            const fbdv = getFBDV(osVersion);
-            const fbsv = getSystemVersion(osVersion);
-            const fbrv = randomSelect(config.fbrvOptions);
-
-            const template = `Mozilla/5.0 (iPhone; CPU iPhone ${osVersion} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) ${mobileToken} [FBAN/FBIOS;FBAV/${fbav};FBBV/${fbbv};FBDV/${fbdv};FBMD/iPhone;FBSN/iOS;FBSV/${fbsv};FBSS/3;FBID/phone;FBLC/en_US;FBOP/5;FBRV/${fbrv};IABMV/1]`;
-
-            return template;
-        }
-
-        // Generate multiple unique user agents
-        function generateMultipleUserAgents(quantity) {
-            const userAgents = new Set();
-            const maxAttempts = quantity * 10; // Prevent infinite loops
-            let attempts = 0;
-
-            while (userAgents.size < quantity && attempts < maxAttempts) {
-                userAgents.add(generateUserAgent());
-                attempts++;
+        function addFBRV() {
+            const input = document.getElementById('fbrvInput');
+            const value = input.value.trim();
+            if (value) {
+                addTag('fbrvTags', value);
+                input.value = '';
             }
-
-            return Array.from(userAgents);
         }
 
-        // Display results
-        function displayResults(userAgents) {
-            const resultsDiv = document.getElementById('results');
+        function addTag(containerId, value) {
+            const container = document.getElementById(containerId);
+            const tag = document.createElement('span');
+            tag.className = 'tag';
+            tag.innerHTML = `${value}<span class="remove-tag" onclick="removeTag(event)">×</span>`;
+            container.appendChild(tag);
+        }
+
+        function removeTag(event) {
+            event.target.parentElement.remove();
+        }
+
+        function getTags(containerId) {
+            const container = document.getElementById(containerId);
+            const tags = container.querySelectorAll('.tag');
+            return Array.from(tags).map(tag => tag.textContent.slice(0, -1)); // Remove the × character
+        }
+
+        function generateRandomFBBV() {
+            return Math.floor(Math.random() * 900000000) + 100000000; // 9-digit number
+        }
+
+        function generateUserAgents() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 10;
+            const baseUserAgent = document.getElementById('baseUserAgent').value.trim();
+            const osVersion = document.getElementById('osVersion').value.trim() || '17_3_1';
+            const mobileToken = document.getElementById('mobileToken').value.trim() || 'Mobile/21D61';
             
-            if (userAgents.length === 0) {
-                resultsDiv.innerHTML = '<p class="text-gray-500 text-center italic">No user agents generated yet.</p>';
+            const fbdvList = getTags('fbdvTags');
+            const fbavList = getTags('fbavTags');
+            const fbrvList = getTags('fbrvTags');
+
+            if (fbdvList.length === 0 || fbavList.length === 0 || fbrvList.length === 0) {
+                alert('Please add at least one item to each pool (FBDV, FBAV, FBRV)');
                 return;
             }
 
-            let html = '';
-            userAgents.forEach((ua, index) => {
-                html += `<div class="user-agent-item mb-3 p-3 bg-white rounded border border-gray-200 shadow-sm">
-                    <div class="text-xs text-gray-500 mb-1">User Agent #${index + 1}</div>
-                    <div class="text-gray-800">${ua}</div>
-                </div>`;
-            });
+            const template = baseUserAgent || defaultTemplate;
+            const fbsv = osVersion.replace(/_/g, '.'); // Convert OS version format for FBSV
+            
+            generatedUserAgents = [];
+            const usedCombinations = new Set();
 
-            resultsDiv.innerHTML = html;
+            // Show loading state
+            const outputArea = document.getElementById('outputArea');
+            outputArea.innerHTML = '<div class="text-center py-8 pulse-animation"><i class="fas fa-spinner fa-spin mr-2"></i>Generating user agents...</div>';
+
+            setTimeout(() => {
+                for (let i = 0; i < quantity; i++) {
+                    let userAgent;
+                    let combination;
+                    let attempts = 0;
+                    const maxAttempts = 1000;
+
+                    do {
+                        const fbdv = fbdvList[Math.floor(Math.random() * fbdvList.length)];
+                        const fbav = fbavList[Math.floor(Math.random() * fbavList.length)];
+                        const fbrv = fbrvList[Math.floor(Math.random() * fbrvList.length)];
+                        const fbbv = generateRandomFBBV();
+
+                        combination = `${fbdv}-${fbav}-${fbrv}-${fbbv}`;
+                        
+                        if (!usedCombinations.has(combination)) {
+                            usedCombinations.add(combination);
+                            
+                            userAgent = template
+                                .replace('{OS_VERSION}', osVersion)
+                                .replace('{MOBILE_TOKEN}', mobileToken)
+                                .replace('{FBDV}', fbdv)
+                                .replace('{FBSV}', fbsv)
+                                .replace('{FBAV}', fbav)
+                                .replace('{FBBV}', fbbv)
+                                .replace('{FBRV}', fbrv);
+                            
+                            break;
+                        }
+                        attempts++;
+                    } while (attempts < maxAttempts);
+
+                    if (userAgent) {
+                        generatedUserAgents.push(userAgent);
+                    }
+                }
+
+                displayUserAgents();
+                updateStatistics();
+            }, 500);
         }
 
-        // Copy to clipboard
-        async function copyToClipboard() {
-            try {
-                const text = generatedUserAgents.join('\n');
-                await navigator.clipboard.writeText(text);
+        function displayUserAgents() {
+            const outputArea = document.getElementById('outputArea');
+            const generatedCount = document.getElementById('generatedCount');
+            
+            if (generatedUserAgents.length === 0) {
+                outputArea.innerHTML = '<p class="text-gray-500 text-center py-8">No user agents generated</p>';
+                generatedCount.textContent = '0';
+                return;
+            }
+
+            const output = generatedUserAgents.map((ua, index) => 
+                `<div class="mb-2 p-2 bg-gray-50 rounded border-l-4 border-blue-500">
+                    <div class="text-xs text-gray-500 mb-1">#${index + 1}</div>
+                    <div class="break-all">${ua}</div>
+                </div>`
+            ).join('');
+
+            outputArea.innerHTML = output;
+            generatedCount.textContent = generatedUserAgents.length;
+        }
+
+        function updateStatistics() {
+            const statsArea = document.getElementById('statsArea');
+            const fbdvSet = new Set();
+            const fbavSet = new Set();
+
+            generatedUserAgents.forEach(ua => {
+                const fbdvMatch = ua.match(/FBDV\/([^;]+)/);
+                const fbavMatch = ua.match(/FBAV\/([^;]+)/);
                 
-                const button = document.getElementById('copyBtn');
+                if (fbdvMatch) fbdvSet.add(fbdvMatch[1]);
+                if (fbavMatch) fbavSet.add(fbavMatch[1]);
+            });
+
+            document.getElementById('statTotal').textContent = generatedUserAgents.length;
+            document.getElementById('statUnique').textContent = generatedUserAgents.length;
+            document.getElementById('statFBDV').textContent = fbdvSet.size;
+            document.getElementById('statFBAV').textContent = fbavSet.size;
+
+            statsArea.style.display = generatedUserAgents.length > 0 ? 'block' : 'none';
+        }
+
+        function copyAllToClipboard() {
+            if (generatedUserAgents.length === 0) {
+                alert('No user agents to copy');
+                return;
+            }
+
+            const text = generatedUserAgents.join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                const button = event.target.closest('button');
                 const originalText = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-check mr-2"></i>Copied!';
-                button.classList.remove('bg-green-500', 'hover:bg-green-600');
                 button.classList.add('bg-green-600');
                 
                 setTimeout(() => {
                     button.innerHTML = originalText;
                     button.classList.remove('bg-green-600');
-                    button.classList.add('bg-green-500', 'hover:bg-green-600');
                 }, 2000);
-            } catch (err) {
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
                 alert('Failed to copy to clipboard');
-            }
+            });
         }
 
-        // Download as text file
-        function downloadAsTextFile() {
+        function downloadAsFile() {
+            if (generatedUserAgents.length === 0) {
+                alert('No user agents to download');
+                return;
+            }
+
             const text = generatedUserAgents.join('\n');
             const blob = new Blob([text], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            
+            const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
+            
             a.href = url;
             a.download = `iphone_user_agents_${new Date().getTime()}.txt`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(url);
         }
 
-        // Update counter
-        function updateCounter() {
-            const count = generatedUserAgents.length;
-            document.getElementById('generatedCount').textContent = `${count} user agent${count !== 1 ? 's' : ''} generated`;
+        function clearOutput() {
+            generatedUserAgents = [];
+            displayUserAgents();
+            updateStatistics();
         }
 
-        // Main generation function
-        async function generateUserAgents() {
-            const quantityInput = document.getElementById('quantity');
-            const quantity = parseInt(quantityInput.value);
+        function saveConfig() {
+            const config = {
+                baseUserAgent: document.getElementById('baseUserAgent').value,
+                quantity: document.getElementById('quantity').value,
+                osVersion: document.getElementById('osVersion').value,
+                mobileToken: document.getElementById('mobileToken').value,
+                fbdvList: getTags('fbdvTags'),
+                fbavList: getTags('fbavTags'),
+                fbrvList: getTags('fbrvTags')
+            };
+
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
             
-            if (isNaN(quantity) || quantity < 1 || quantity > 1000) {
-                alert('Please enter a valid quantity between 1 and 1000');
-                return;
-            }
-
-            // Show loading
-            document.getElementById('loadingSpinner').classList.remove('hidden');
-            document.getElementById('generateBtn').disabled = true;
-
-            // Simulate processing time for large batches
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            try {
-                generatedUserAgents = generateMultipleUserAgents(quantity);
-                displayResults(generatedUserAgents);
-                updateCounter();
-                
-                // Enable action buttons
-                document.getElementById('copyBtn').disabled = false;
-                document.getElementById('downloadBtn').disabled = false;
-                
-            } catch (error) {
-                alert('Error generating user agents: ' + error.message);
-            } finally {
-                // Hide loading
-                document.getElementById('loadingSpinner').classList.add('hidden');
-                document.getElementById('generateBtn').disabled = false;
-            }
+            a.href = url;
+            a.download = `user_agent_config_${new Date().getTime()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
         }
 
-        // Event listeners
-        document.getElementById('generateBtn').addEventListener('click', generateUserAgents);
-        document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
-        document.getElementById('downloadBtn').addEventListener('click', downloadAsTextFile);
+        function loadConfig() {
+            document.getElementById('fileInput').click();
+        }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeConfig();
-            updateCounter();
+        function handleFileLoad(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+                    
+                    // Load basic settings
+                    document.getElementById('baseUserAgent').value = config.baseUserAgent || '';
+                    document.getElementById('quantity').value = config.quantity || 10;
+                    document.getElementById('osVersion').value = config.osVersion || '17_3_1';
+                    document.getElementById('mobileToken').value = config.mobileToken || 'Mobile/21D61';
+                    
+                    // Clear existing tags and load new ones
+                    ['fbdvTags', 'fbavTags', 'fbrvTags'].forEach(id => {
+                        document.getElementById(id).innerHTML = '';
+                    });
+                    
+                    // Load FBDV tags
+                    if (config.fbdvList) {
+                        config.fbdvList.forEach(item => addTag('fbdvTags', item));
+                    }
+                    
+                    // Load FBAV tags
+                    if (config.fbavList) {
+                        config.fbavList.forEach(item => addTag('fbavTags', item));
+                    }
+                    
+                    // Load FBRV tags
+                    if (config.fbrvList) {
+                        config.fbrvList.forEach(item => addTag('fbrvTags', item));
+                    }
+                    
+                    alert('Configuration loaded successfully!');
+                } catch (error) {
+                    alert('Error loading configuration file');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Add Enter key support for inputs
+        document.getElementById('fbdvInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addFBDV();
         });
 
-        // Allow Enter key to generate
-        document.getElementById('quantity').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                generateUserAgents();
-            }
+        document.getElementById('fbavInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addFBAV();
+        });
+
+        document.getElementById('fbrvInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') addFBRV();
         });
     </script>
 </body>
